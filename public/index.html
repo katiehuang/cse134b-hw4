@@ -1,0 +1,106 @@
+<html>
+
+<head>
+    <title>Art You Find In Bathrooms</title>
+    <link rel="stylesheet" href="style.css" type="text/css">
+    <!--CSS for modal-->
+    <link rel="stylesheet" type="text/css" Href="bootstrap/bootstrap.min.css">
+</head>
+
+<body>
+    <ul class="topnav">
+        <li>
+            <p><a href="index.html">Home</a></p>
+        </li>
+        <li>
+            <p><a href="#" data-toggle="modal" data-target="#addArtModal">Add Art</a></p>
+        </li>
+        <li>
+            <p><a href="#" data-toggle="modal" data-target="#loginModal">Login</a></p>
+        </li>
+        <li>
+            <p><a href="#" data-toggle="modal" data-target="#registerModal">Register</a></p>
+        </li>
+    </ul>
+
+    <div id="container"></div>
+
+    <!-- Add Art Modal -->
+    <div class="modal fade" id="addArtModal" tabindex="-1" role="dialog" aria-labelledby="addArtModal">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                    <h4 class="modal-title" id="myModalLabel">Modal Header</h4>
+                </div>
+                <div class="modal-body">
+                    Modal Body
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+                    <button id="loginSubmit" type="button" class="btn btn-primary">Save Changes</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- Login Modal -->
+    <div class="modal fade" id="loginModal" tabindex="-1" role="dialog" aria-labelledby="myLoginModal">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                    <h4 class="modal-title" id="myModalLabel">Login</h4>
+                </div>
+                <div class="modal-body">
+                    <form>
+                        <p>Login:</p>
+                        <br/>
+                        <input id="loginEmail" type="text" name="login" />
+                        <br/>
+                        <br/>
+                        <p>Password:</p>
+                        <br/>
+                        <input id="loginPassword" type="text" name="password" />
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+                    <button id="loginSubmit" type="button" class="btn btn-primary">Submit</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- Register Modal -->
+    <div class="modal fade" id="registerModal" tabindex="-1" role="dialog" aria-labelledby="myRegisterModal">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                    <h4 class="modal-title" id="myModalLabel">Register</h4>
+                </div>
+                <div class="modal-body">
+                    <form method="POST">
+                        <p>Email:</p>
+                        <br/>
+                        <input id="registerEmail" type="text" name="login" />
+                        <br/>
+                        <br/>
+                        <p>Password:</p>
+                        <br/>
+                        <input id="registerPassword" type="text" name="password" />
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+                    <button id="registerSubmit" type="button" class="btn btn-primary">Submit</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    <script src="https://www.gstatic.com/firebasejs/3.7.0/firebase.js"></script>
+    <script src="bootstrap/jquery-3.1.1.min.js"></script>
+    <script src="bootstrap/bootstrap.min.js"></script>
+    <script src="script.js"></script>
+</body>
+
+</html>

@@ -1,0 +1,122 @@
+@import url("https://fonts.googleapis.com/css?family=Roboto");
+.topnav {
+    list-style-type: none;
+    margin: 0;
+    padding: 0;
+    overflow: hidden;
+    background-color: #e89da8;
+}
+
+.topnav li {
+    float: left;
+    padding: 14px 16px;
+}
+
+.topnav li a {
+    display: block;
+    color: white;
+    text-align: center;
+    text-decoration: none;
+}
+
+.topnav li a:hover {
+    background-color: #111;
+}
+
+.topnav #search {
+    float: right;
+    vertical-align: middle;
+}
+
+h1,
+h2,
+h3,
+h4,
+h5,
+h6,
+p {
+    font-family: 'Roboto', Arial, sans-serif;
+    margin: 0;
+}
+
+header {
+    text-align: center;
+    margin: 30px 0;
+}
+
+#homepage-container {
+    width: 90vw;
+    overflow: hidden;
+    height: 100%;
+    margin: 0 auto;
+}
+
+#homepage-container .homepage-image {
+    position: relative;
+    width: 30vw;
+    height: 30vw;
+    overflow: hidden;
+    float: left;
+    display: block;
+    background-color: #e89da8;
+}
+
+#homepage-container img {
+    width: 100%;
+}
+
+.buttons {
+    margin: 0 auto;
+    text-align: center;
+}
+
+.buttons button {
+    margin: 20px;
+    display: inline-block;
+}
+
+.form {
+    width: 50%;
+    margin: 0 auto;
+}
+
+.fg-container {
+    background-color: #e89da8;
+}
+
+.searchitem {
+    overflow: hidden;
+    height: 60%;
+    border: 5px solid black;
+    margin-bottom: 5px;
+    position: relative;
+}
+
+.searchitemimage,
+.searchitemdetails {
+    float: left;
+}
+
+.searchitemimage {
+    width: 40%;
+}
+
+.searchitemdetails {
+    width: 55%;
+    margin-top: 2.5%;
+    margin-left: 2.5%;
+    margin-right: 2.5%;
+}
+
+.action-btns {
+    width: 25%;
+    position: absolute;
+    bottom: 0;
+}
+
+.action-btns img {
+    width: 10%;
+}
+
+
+/*# sourceMappingURL=style.css.map */
