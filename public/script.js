@@ -102,3 +102,65 @@ $('#imageModal').on('show.bs.modal', function(e) {
 
     var modal = $(this);
 });
+
+//Add art
+var changesBtn = document.getElementById("saveChanges");
+changesBtn.onclick = function() {
+    //Check if someone is logged in before adding
+    var user = firebase.auth().currentUser;
+    if(!user){
+        window.alert("You need to log in first!\n");
+        return;
+    }
+
+    //Grab content of form
+    var titleField = document.getElementById("title").value;
+    var locField = document.getElementById("location").value;
+    var sfwField = getRadioVal("SFW");
+    var desField = document.getElementById("description").value;
+    var tagField = document.getElementById("tags").value;
+    var out = "";
+    if(!titleField){
+        out += "Please include a title. \n";
+    }
+    if(!locField){
+        out += "Please include a location. \n";
+    }
+    if(!sfwField){
+        out += "Please indicate a safety rating. \n";
+    }
+    if(!desField){
+        out += "Please include a description.";
+    }
+
+    //Notify user of unfilled fields and stop
+    if(out){
+        window.alert(out);
+        return;
+    }
+
+    //Push info to storage
+    //var newImage = storage.ref().child(titleField + ".jpg");
+
+    //Push info to firebase 
+    var imgRef = firebase.database().ref("/images");
+    imgRef = imgRef.child(titleField).set({
+        "image-name": titleField,
+        location: locField,
+        safety: sfwField,
+        description: desField,
+        tags: tagField,
+        storage: "no target yet"
+    }).then(function(){ console.log("Push completed!"); });         
+  }
+
+function getRadioVal(radioName){
+    var value = "";
+    var radios = document.getElementsByName(radioName);
+    for(var i = 0; i < radios.length; i++){
+        if(radios[i].checked){
+            value = radios[i].value;
+        }
+    }
+    return value;        
+} 
