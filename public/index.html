@@ -22,8 +22,8 @@
             <p><a href="#" data-toggle="modal" data-target="#registerModal">Register</a></p>
         </li>
     </ul>
-
-    <div id="container"></div>
+    <div style="font-size: 30px">&nbsp;</div>
+    <div id="homepage-container"></div>
 
     <!-- Add Art Modal -->
     <div class="modal fade" id="addArtModal" tabindex="-1" role="dialog" aria-labelledby="addArtModal">
@@ -43,6 +43,7 @@
             </div>
         </div>
     </div>
+
     <!-- Login Modal -->
     <div class="modal fade" id="loginModal" tabindex="-1" role="dialog" aria-labelledby="myLoginModal">
         <div class="modal-dialog" role="document">
@@ -61,6 +62,9 @@
                         <p>Password:</p>
                         <br/>
                         <input id="loginPassword" type="text" name="password" />
+                        <br/>
+                        <br/>
+                        <button id="googleLogin" type="button" class="btn btn-primary">Sign In With Google</button>
                     </form>
                 </div>
                 <div class="modal-footer">
@@ -97,6 +101,27 @@
             </div>
         </div>
     </div>
+
+    <!-- Image Modal -->
+    <div class="modal fade" id="imageModal" tabindex="-1" role="dialog" aria-labelledby="myImageModal">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                    <h4 class="modal-title" id="imageModalTitle"></h4>
+                </div>
+                <div class="modal-body">
+                    //insert stuff here
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+                    <button id="edit" type="button" class="btn btn-primary">Edit</button>
+                    <button id="edit" type="button" class="btn btn-primary">Delete</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    
     <script src="https://www.gstatic.com/firebasejs/3.7.0/firebase.js"></script>
     <script src="bootstrap/jquery-3.1.1.min.js"></script>
     <script src="bootstrap/bootstrap.min.js"></script>

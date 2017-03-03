@@ -39,31 +39,66 @@ registerSubmit.onclick = function() {
 };
 
 // login with Google
+var provider = new firebase.auth.GoogleAuthProvider();
+
+var googleLogin = document.getElementById('googleLogin');
+googleLogin.onclick = function() {
+    firebase.auth().signInWithPopup(provider).then(function(result) {3
+        // This gives you a Google Access Token. You can use it to access the Google API.
+        var token = result.credential.accessToken;
+        // The signed-in user info.
+        var user = result.user;
+        // ...3
+    }).catch(function(error) {
+        // Handle Errors here.
+        var errorCode = error.code;
+        var errorMessage = error.message;
+        // The email of the user's account used.
+        var email = error.email;
+        // The firebase.auth.AuthCredential type that was used.
+        var credential = error.credential;
+        // ...
+    });
+};
 
 // Get 3 images
- window.onload = function getImages(){
+window.onload = function getImages() {
     var img1 = storage.ref("memewall.jpg");
     var img2 = storage.ref("takeaknee.jpg");
     var img3 = storage.ref("whitetiger.jpg");
 
-    var parent = document.getElementById("container");
+    var parent = document.getElementById("homepage-container");
 
-    img1.getDownloadURL().then(function(url){
+    img1.getDownloadURL().then(function(url) {
         creatImgTag(url, parent);
     });
-    img2.getDownloadURL().then(function(url){
+    img2.getDownloadURL().then(function(url) {
         creatImgTag(url, parent);
     });
-    img2.getDownloadURL().then(function(url){
+    img2.getDownloadURL().then(function(url) {
         creatImgTag(url, parent);
     });
- }
+}
 
- //
+// style image and put into DOM tree
 
- function creatImgTag(img, parent){
-    var newImg = document.createElement("IMG");
+function creatImgTag(img, parent) {
+    var newImg = document.createElement("img");
     newImg.src = img;
-    newImg.className = "mainImg";
-    parent.appendChild(newImg);
- }
+    newImg.setAttribute("data-toggle", "modal");
+    newImg.setAttribute("data-target", "#imageModal");
+    //newImg.setAttribute("data-imgData", );
+
+    var newDiv = document.createElement("div");
+    newDiv.className = "homepage-image";
+    newDiv.appendChild(newImg);
+    parent.appendChild(newDiv);
+}
+
+// pass in image data into DOM tree
+$('#imageModal').on('show.bs.modal', function(e) {
+    var img = $(event.relatedTarget); // img that triggered modal
+    var recipient = img.data('imgData'); // extract info from data-* attributes
+
+    var modal = $(this);
+});
