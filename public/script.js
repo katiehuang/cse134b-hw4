@@ -75,7 +75,7 @@ window.onload = function getImages() {
     img2.getDownloadURL().then(function(url) {
         creatImgTag(url, parent);
     });
-    img2.getDownloadURL().then(function(url) {
+    img3.getDownloadURL().then(function(url) {
         creatImgTag(url, parent);
     });
 }
@@ -95,12 +95,23 @@ function creatImgTag(img, parent) {
     parent.appendChild(newDiv);
 }
 
-// pass in image data into DOM tree
-$('#imageModal').on('show.bs.modal', function(e) {
-    var img = $(event.relatedTarget); // img that triggered modal
-    var recipient = img.data('imgData'); // extract info from data-* attributes
-
+//attach image of caller to modal
+$("#imageModal").on('show.bs.modal', function(e) {
+    var img = $(e.relatedTarget); // img that triggered modal
+    //var recipient = img.data('imgData'); // extract info from data-* attributes
+    var newImg = document.createElement("img");
+    newImg.src = img[0].src;
+    this.getElementsByClassName("modal-body")[0].appendChild(newImg);
     var modal = $(this);
+});
+
+//Empty the modal body when hidden
+$("#imageModal").on('hide.bs.modal', function(){
+    var body = this.getElementsByClassName("modal-body")[0];
+    var children = body.children;
+    while(body.hasChildNodes()){
+        body.removeChild(body.lastChild);
+    }
 });
 
 //Add art
