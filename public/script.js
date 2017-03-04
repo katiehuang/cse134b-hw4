@@ -21,7 +21,7 @@ loginSubmit.onclick = function() {
         var errorMessage = error.message;
 
         window.alert(errorMessage);
-    });
+    }).then( function(){ $("#loginModal").modal('hide'); });
 };
 
 // register
@@ -63,46 +63,120 @@ googleLogin.onclick = function() {
 
 // Get 3 images
 window.onload = function getImages() {
-    var img1 = storage.ref("memewall.jpg");
-    var img2 = storage.ref("takeaknee.jpg");
-    var img3 = storage.ref("whitetiger.jpg");
-
     var parent = document.getElementById("homepage-container");
+    var startRef = database.ref("/images");
 
-    img1.getDownloadURL().then(function(url) {
-        creatImgTag(url, parent);
-    });
-    img2.getDownloadURL().then(function(url) {
-        creatImgTag(url, parent);
-    });
-    img3.getDownloadURL().then(function(url) {
-        creatImgTag(url, parent);
+    startRef.on('value', function(snapshot){
+    	while(parent.hasChildNodes()){
+    		parent.removeChild(parent.lastChild);
+    	}
+
+    	snapshot.forEach(function(childSC){
+			creatImgTag(childSC.val(), parent);    		
+    	})
     });
 }
 
 // style image and put into DOM tree
-
-function creatImgTag(img, parent) {
+function creatImgTag(value, parent) {
     var newImg = document.createElement("img");
-    newImg.src = img;
-    newImg.setAttribute("data-toggle", "modal");
-    newImg.setAttribute("data-target", "#imageModal");
-    //newImg.setAttribute("data-imgData", );
+    var link = storage.ref(value.storageLink);
+    link.getDownloadURL().then(function(url){
+    	newImg.src = url;
+    	newImg.setAttribute("data-toggle", "modal");
+    	newImg.setAttribute("data-target", "#imageModal");
+    	newImg.setAttribute("data-imgData", value.imageName);
 
-    var newDiv = document.createElement("div");
-    newDiv.className = "homepage-image";
-    newDiv.appendChild(newImg);
-    parent.appendChild(newDiv);
+    	var newDiv = document.createElement("div");
+    	newDiv.className = "homepage-image";
+   	 	newDiv.appendChild(newImg);
+    	parent.appendChild(newDiv);
+    });
+    //newImg.src = img;
+    
 }
 
-//attach image of caller to modal
+//Image Modal Behaviors (view/delete/edit)
 $("#imageModal").on('show.bs.modal', function(e) {
     var img = $(e.relatedTarget); // img that triggered modal
-    //var recipient = img.data('imgData'); // extract info from data-* attributes
     var newImg = document.createElement("img");
-    newImg.src = img[0].src;
-    this.getElementsByClassName("modal-body")[0].appendChild(newImg);
-    var modal = $(this);
+
+    var imgInfo;
+    var imageData = img[0].dataset.imgdata;
+    var imgModal = this;
+    var modalBody = imgModal.getElementsByClassName("modal-body")[0];
+    var aye = database.ref("/images").child(imageData).once('value').then(function(snapshot){
+    		imgInfo = snapshot.val();
+    		var newDiv = document.createElement("div");
+		    newDiv.insertAdjacentHTML('beforeend', genTemplate(imgInfo));
+		    modalBody.appendChild(newImg);
+		    modalBody.appendChild(newDiv);
+    });
+
+    //Add hidden edit view 
+    modalBody.insertAdjacentHTML('beforeend', addHiddenEdit());
+
+    //Delete an image
+	var delBtn = document.getElementById("deleteImgBtn");
+	delBtn.onclick = function(){
+		var link = imgInfo.storageLink;
+		database.ref("/images").child(imageData).remove();
+		storage.ref(link).delete();
+		$("#imageModal").modal('hide');
+	}
+
+	//Edit an image
+	var editBtn = document.getElementById("editImgBtn");
+	var confirmBtn = document.getElementById("confirmEditsBtn");
+	editBtn.onclick = function(){
+		document.getElementById("editView").classList.remove("hidden");
+		confirmBtn.classList.remove("hidden");
+		database.ref("/images").child(imageData).remove();
+		//console.log("Deleted the old " + imageData);
+		
+	}
+	
+	confirmBtn.onclick = function() {
+		var titleField = document.getElementById("editTitle").value;
+	    var locField = document.getElementById("editLocation").value;
+	    var sfwField = getRadioVal("editSFW");
+	    var desField = document.getElementById("editDescription").value;
+	    var tagField = document.getElementById("editTags").value;
+	    
+	    //If nothing was filled let the user know!
+	    if(!titleField){
+	        titleField = imgInfo.imageName;
+	    }
+	    if(!locField){
+	        locField = imgInfo.location;
+	    }
+	    if(!sfwField){
+			sfwField = imgInfo.safety;
+		}
+	    if(!desField){
+	        desField = imgInfo.description;
+	    }
+	    if(!tagField){
+	    	tagField = imgInfo.tags;
+	    }
+
+	    var theButton = this;
+	    var editView = document.getElementById("editView");
+
+	    //Cool, we can edit now
+	    var imgRef = firebase.database().ref("/images"); 
+		imgRef.child(titleField).set({
+	        imageName: titleField,
+	        location: locField,
+	        safety: sfwField,
+	        description: desField,
+	        tags: tagField,
+	        storageLink: imgInfo.storageLink
+		}).then(function(){ 
+			editView.classList.add("hidden");
+			theButton.classList.add("hidden");			
+		});
+	}
 });
 
 //Empty the modal body when hidden
@@ -113,6 +187,24 @@ $("#imageModal").on('hide.bs.modal', function(){
         body.removeChild(body.lastChild);
     }
 });
+
+//Empty login modal fields when hidden
+$("#loginModal").on('hide.bs.modal', function(){
+	var inputs = this.getElementsByTagName("input");
+	console.log(inputs);
+	for(var i = 0; i < inputs.length; i++){
+		inputs[i].value = "";
+	}
+});
+
+//Empty addArt modal fields when hidden
+$("#addArtModal").on('hide.bs.modal', function(){
+	var inputs = this.getElementsByTagName("input");
+	console.log(inputs);
+	for(var i = 0; i < inputs.length; i++){
+		inputs[i].value = "";
+	}
+})
 
 //Add art
 var changesBtn = document.getElementById("saveChanges");
@@ -130,6 +222,8 @@ changesBtn.onclick = function() {
     var sfwField = getRadioVal("SFW");
     var desField = document.getElementById("description").value;
     var tagField = document.getElementById("tags").value;
+    var fileField = document.getElementById("file").files[0];
+    var storageLinkName = ""
     var out = "";
     if(!titleField){
         out += "Please include a title. \n";
@@ -143,6 +237,10 @@ changesBtn.onclick = function() {
     if(!desField){
         out += "Please include a description.";
     }
+    //Also check if file is an image (later)
+    if(!fileField){
+    	out += "Please attach an image";
+    }
 
     //Notify user of unfilled fields and stop
     if(out){
@@ -151,19 +249,24 @@ changesBtn.onclick = function() {
     }
 
     //Push info to storage
-    //var newImage = storage.ref().child(titleField + ".jpg");
+    if(fileField){
+    	var newImage = storage.ref().child(fileField.name);
+    	newImage.put(fileField).then(function(snapshot){
+    		storageLinkName = snapshot.a.fullPath;
 
-    //Push info to firebase 
-    var imgRef = firebase.database().ref("/images");
-    imgRef = imgRef.child(titleField).set({
-        "image-name": titleField,
-        location: locField,
-        safety: sfwField,
-        description: desField,
-        tags: tagField,
-        storage: "no target yet"
-    }).then(function(){ console.log("Push completed!"); });         
-  }
+    		//Push info to firebase only after storage
+		    var imgRef = firebase.database().ref("/images");
+		    imgRef = imgRef.child(titleField).set({
+		        imageName: titleField,
+		        location: locField,
+		        safety: sfwField,
+		        description: desField,
+		        tags: tagField,
+		        storageLink: storageLinkName
+		    });
+		}).then( function(){ $("#addArtModal").modal('hide'); });
+	}
+}
 
 function getRadioVal(radioName){
     var value = "";
@@ -175,3 +278,24 @@ function getRadioVal(radioName){
     }
     return value;        
 } 
+
+function genTemplate(childSCval){
+	var returnString = "";
+	for(var key in childSCval){
+		returnString += "<h3>" + key + "</h3><br/>";
+		returnString += "<p>" + childSCval[key] + "</p><br/><br/>";
+	}
+	return returnString;
+}
+
+function addHiddenEdit(){
+	var content = "<div id=\"editView\" class=\"hidden\">" +
+               	  "<p>Title:</p><input type=\"text\" id=\"editTitle\"><br/><br/>" +
+                  "<p>Location:</p><input type=\"text\" id=\"editLocation\"><br/><br/>" +
+                  "<p>Safe for work:</p><input type=\"radio\" name=\"editSFW\" value=\"Yes\">Yes<input type=\"radio\" name=\"SFW\" value=\"No\">No<br/><br/>" +
+                  "<p>Description:</p><input type=\"text\" id=\"editDescription\"><br/><br/>" +
+	              "<p>Tags:</p><input type=\"text\" id=\"editTags\"><br/><br/>" +
+	              "</div>";
+
+    return content;
+}
