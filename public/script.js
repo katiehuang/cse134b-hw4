@@ -9,6 +9,7 @@ var config = {
 firebase.initializeApp(config);
 var storage = firebase.storage();
 var database = firebase.database();
+var mobile = "";
 
 //Global user variable
 var user = firebase.auth().currentUser;
@@ -45,6 +46,9 @@ function getImages() {
 
 //Get 3 images
 window.onload = function(){
+    if( /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent) ) {
+        mobile = "_m";
+    }
     getImages();
 }
 
@@ -60,7 +64,6 @@ loginSubmit.onclick = function() {
 
         window.alert(errorMessage);
     }).then( function(){ 
-        getImages();
         $("#loginModal").modal('hide'); 
     });
 };
@@ -99,7 +102,6 @@ googleLogin.onclick = function() {
         var credential = error.credential;
         // ...
     }).then( function(){ 
-        getImages();
         $("#loginModal").modal('hide'); 
     });
 };
@@ -107,7 +109,7 @@ googleLogin.onclick = function() {
 //style image and put into DOM tree
 function creatImgTag(value, parent) {
     var newImg = document.createElement("img");
-    var link = storage.ref(value.storageLink);
+    var link = storage.ref(value.storageLink + mobile);
     link.getDownloadURL().then(function(url){
     	newImg.src = url;
     	newImg.setAttribute("data-toggle", "modal");
@@ -146,7 +148,7 @@ $("#imageModal").on('show.bs.modal', function(e) {
         newDiv.id = "imgDetails";
 	    newDiv.insertAdjacentHTML('beforeend', genTemplate(imgInfo));
         //Add image to body
-        storage.ref(imgInfo.storageLink).getDownloadURL().then(function(url){
+        storage.ref(imgInfo.storageLink + mobile).getDownloadURL().then(function(url){
             modalBody.textContent = "";
             newImg.src = url;
 
@@ -337,9 +339,6 @@ changesBtn.onclick = function() {
         $("#addArtModal").modal('hide');
         return;
     }
-    else{
-        console.log(user);
-    }
 
     //Grab content of form
     var titleField = document.getElementById("title").value;
@@ -375,7 +374,9 @@ changesBtn.onclick = function() {
 
     //Push info to storage
     if(fileField){
-    	var newImage = storage.ref().child(fileField.name);
+        mobileScale(fileField);
+        var fileName = fileField.name.split(".")[0];
+    	var newImage = storage.ref().child(fileName);
     	newImage.put(fileField).then(function(snapshot){
     		storageLinkName = snapshot.a.fullPath;
 
@@ -387,7 +388,7 @@ changesBtn.onclick = function() {
 		        safety: sfwField,
 		        description: desField,
 		        tags: tagField,
-		        storageLink: storageLinkName
+		        storageLink: storageLinkName.split(".")[0]
 		    });
 		}).then( function(){ $("#addArtModal").modal('hide'); });
 	}
@@ -438,4 +439,47 @@ function addHiddenEdit(){
                   "</div>";
 
     return content;
+}
+
+function mobileScale(file){
+    var image = new Image();
+    var reader = new FileReader();
+
+    var fileName = file.name.split(".")[0];
+
+    reader.onload = function(e){
+        image.src = reader.result;
+        var canvas = resizeInCanvas(image);
+        canvas.toBlob(function(blob){
+            storage.ref().child(fileName + "_m").put(blob);
+        }, "image/jpeg");
+    }
+
+    image.src = reader.readAsDataURL(file);   
+}
+
+function resizeInCanvas(img){
+    var canvas = document.createElement('canvas');
+    var MWidth = 300;
+    var MHeight = 300;
+    var width = img.width;
+    var height = img.height;
+
+    if (width > height) {
+      if (width > MWidth) {
+        height *= MWidth / width;
+        width = MWidth;
+      }
+    } else {
+      if (height > MHeight) {
+        width *= MHeight / height;
+        height = MHeight;
+      }
+    }
+    canvas.width = width;
+    canvas.height = height;
+    var ctx = canvas.getContext("2d");
+    ctx.drawImage(img, 0, 0, width, height);
+    // console.log(canvas.toDataURL()); 
+    return canvas;
 }
