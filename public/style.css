@@ -121,5 +121,47 @@ header {
     width: 10%;
 }
 
+#imgDetails{
+    float: left;
+    width: 50%;
+}
+
+.modal-body, #infoBody{
+    overflow: hidden;
+}
+
+#editView{
+    border-style: outset;
+    padding: 3%;
+}
+
+.modal-body img {
+    display: inline;
+    width: 50%;
+}
+
+#editView p {
+    float: left;
+}
+
+#editView input{
+    float: right;
+}
+
+#sfwRadios input{
+    float: none;
+}
+
+#sfwRadios{
+    float: right;
+}
+
+#registerPassword, #loginPassword{
+    -webkit-text-security: disc;
+}
+
+#logout{
+    float: right;
+}
 
 /*# sourceMappingURL=style.css.map */

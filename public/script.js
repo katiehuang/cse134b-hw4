@@ -10,6 +10,44 @@ firebase.initializeApp(config);
 var storage = firebase.storage();
 var database = firebase.database();
 
+//Global user variable
+var user = firebase.auth().currentUser;
+var logout = document.getElementById("logout");
+firebase.auth().onAuthStateChanged(function(users) {
+  user = users;
+  if (users) {
+    logout.classList.remove("hidden");
+    
+  } else {
+    logout.classList.add("hidden");
+  }
+});
+
+logout.onclick = function(){
+    firebase.auth().signOut();
+}
+
+function getImages() {
+    var parent = document.getElementById("homepage-container");
+    var startRef = database.ref("/images");
+
+    startRef.on('value', function(snapshot){
+        console.log("updating main list");
+        while(parent.hasChildNodes()){
+            parent.removeChild(parent.lastChild);
+        }
+
+        snapshot.forEach(function(childSC){
+            creatImgTag(childSC.val(), parent);         
+        })
+    });
+}
+
+//Get 3 images
+window.onload = function(){
+    getImages();
+}
+
 // Login
 var loginSubmit = document.getElementById('loginSubmit');
 loginSubmit.onclick = function() {
@@ -21,7 +59,10 @@ loginSubmit.onclick = function() {
         var errorMessage = error.message;
 
         window.alert(errorMessage);
-    }).then( function(){ $("#loginModal").modal('hide'); });
+    }).then( function(){ 
+        getImages();
+        $("#loginModal").modal('hide'); 
+    });
 };
 
 // register
@@ -35,12 +76,11 @@ registerSubmit.onclick = function() {
         var errorMessage = error.message;
 
         window.alert(errorMessage);
-    });
+    }).then( function(){ $("#registerModal").modal('hide'); });
 };
 
 // login with Google
 var provider = new firebase.auth.GoogleAuthProvider();
-
 var googleLogin = document.getElementById('googleLogin');
 googleLogin.onclick = function() {
     firebase.auth().signInWithPopup(provider).then(function(result) {3
@@ -58,26 +98,13 @@ googleLogin.onclick = function() {
         // The firebase.auth.AuthCredential type that was used.
         var credential = error.credential;
         // ...
+    }).then( function(){ 
+        getImages();
+        $("#loginModal").modal('hide'); 
     });
 };
 
-// Get 3 images
-window.onload = function getImages() {
-    var parent = document.getElementById("homepage-container");
-    var startRef = database.ref("/images");
-
-    startRef.on('value', function(snapshot){
-    	while(parent.hasChildNodes()){
-    		parent.removeChild(parent.lastChild);
-    	}
-
-    	snapshot.forEach(function(childSC){
-			creatImgTag(childSC.val(), parent);    		
-    	})
-    });
-}
-
-// style image and put into DOM tree
+//style image and put into DOM tree
 function creatImgTag(value, parent) {
     var newImg = document.createElement("img");
     var link = storage.ref(value.storageLink);
@@ -91,9 +118,7 @@ function creatImgTag(value, parent) {
     	newDiv.className = "homepage-image";
    	 	newDiv.appendChild(newImg);
     	parent.appendChild(newDiv);
-    });
-    //newImg.src = img;
-    
+    });    
 }
 
 //Image Modal Behaviors (view/delete/edit)
@@ -105,20 +130,44 @@ $("#imageModal").on('show.bs.modal', function(e) {
     var imageData = img[0].dataset.imgdata;
     var imgModal = this;
     var modalBody = imgModal.getElementsByClassName("modal-body")[0];
-    var aye = database.ref("/images").child(imageData).once('value').then(function(snapshot){
-    		imgInfo = snapshot.val();
-    		var newDiv = document.createElement("div");
-		    newDiv.insertAdjacentHTML('beforeend', genTemplate(imgInfo));
-		    modalBody.appendChild(newImg);
-		    modalBody.appendChild(newDiv);
-    });
 
-    //Add hidden edit view 
-    modalBody.insertAdjacentHTML('beforeend', addHiddenEdit());
+    modalBody.textContent = "Content Loading...";
+
+    //Begin adding content
+    database.ref("/images").child(imageData).once('value').then(function(snapshot){    		
+        imgInfo = snapshot.val();
+        //Set modal title to name of image
+        var modalHeader = document.getElementById("imageModalTitle");
+        if(imgInfo["imageName"]){
+            modalHeader.textContent = imgInfo["imageName"];
+        }
+        //Add image info to modal body
+		var newDiv = document.createElement("div");
+        newDiv.id = "imgDetails";
+	    newDiv.insertAdjacentHTML('beforeend', genTemplate(imgInfo));
+        //Add image to body
+        storage.ref(imgInfo.storageLink).getDownloadURL().then(function(url){
+            modalBody.textContent = "";
+            newImg.src = url;
+
+            var infoBody = document.createElement("div");
+            infoBody.id = "infoBody";
+            //Add hidden edit view 
+            infoBody.appendChild(newDiv);
+            infoBody.appendChild(newImg);
+            modalBody.appendChild(infoBody);
+            modalBody.insertAdjacentHTML('beforeend', addHiddenEdit());
+
+        });
+    });
 
     //Delete an image
 	var delBtn = document.getElementById("deleteImgBtn");
 	delBtn.onclick = function(){
+        if(!user){
+            alert("You must log in to use this function.");
+            return;
+        }
 		var link = imgInfo.storageLink;
 		database.ref("/images").child(imageData).remove();
 		storage.ref(link).delete();
@@ -127,26 +176,56 @@ $("#imageModal").on('show.bs.modal', function(e) {
 
 	//Edit an image
 	var editBtn = document.getElementById("editImgBtn");
-	var confirmBtn = document.getElementById("confirmEditsBtn");
-	editBtn.onclick = function(){
-		document.getElementById("editView").classList.remove("hidden");
-		confirmBtn.classList.remove("hidden");
-		database.ref("/images").child(imageData).remove();
-		//console.log("Deleted the old " + imageData);
-		
+    var confirmBtn = document.getElementById("confirmEditsBtn");
+	var cancelEditsBtn = document.getElementById("cancelEditsBtn");
+    editBtn.onclick = function(){
+        if(!user){
+            alert("You must log in to use this function.");
+            return;
+        }    
+        if($("#editView").hasClass("hidden")){
+            var eV = document.getElementById("editView");
+            eV.classList.remove("hidden");
+            confirmBtn.classList.remove("hidden");
+            cancelEditsBtn.classList.remove("hidden");
+            $("#editImgBtn").addClass("hidden");
+            $("#deleteImgBtn").addClass("hidden");
+        }				
 	}
 	
+    cancelEditsBtn.onclick = function(){
+        var eV = document.getElementById("editView");
+        var inputs = eV.getElementsByTagName("input");
+        for(var i = 0; i < inputs.length; i++){
+            if(inputs[i].type == "radio"){
+                inputs[i].checked = false;
+                continue;
+            }
+            inputs[i].value = "";
+        }
+        eV.classList.add("hidden");
+        confirmBtn.classList.add("hidden");
+        cancelEditsBtn.classList.add("hidden");
+        $("#editImgBtn").removeClass("hidden");            
+        $("#deleteImgBtn").removeClass("hidden"); 
+    }
+
 	confirmBtn.onclick = function() {
+
 		var titleField = document.getElementById("editTitle").value;
 	    var locField = document.getElementById("editLocation").value;
 	    var sfwField = getRadioVal("editSFW");
 	    var desField = document.getElementById("editDescription").value;
 	    var tagField = document.getElementById("editTags").value;
-	    
+	    var fileField = document.getElementById("editFile").files[0];
+        var removeOld = 0;
 	    //If nothing was filled let the user know!
 	    if(!titleField){
 	        titleField = imgInfo.imageName;
 	    }
+        else{
+            database.ref("images").child(imgInfo.imageName).remove();
+        }
 	    if(!locField){
 	        locField = imgInfo.location;
 	    }
@@ -164,28 +243,59 @@ $("#imageModal").on('show.bs.modal', function(e) {
 	    var editView = document.getElementById("editView");
 
 	    //Cool, we can edit now
-	    var imgRef = firebase.database().ref("/images"); 
-		imgRef.child(titleField).set({
-	        imageName: titleField,
-	        location: locField,
-	        safety: sfwField,
-	        description: desField,
-	        tags: tagField,
-	        storageLink: imgInfo.storageLink
-		}).then(function(){ 
-			editView.classList.add("hidden");
-			theButton.classList.add("hidden");			
-		});
+
+        //If a new file was uploaded, change the entry in storage
+        if(fileField){
+            storage.ref(imgInfo.storageLink).delete();
+            storage.ref().child(fileField.name).put(fileField).then(function(snapshot){
+                storageLinkName = snapshot.a.fullPath;
+
+            //Push info to firebase only after storage
+                var imgRef = firebase.database().ref("/images");
+                imgRef = imgRef.child(titleField).update({
+                    imageName: titleField,
+                    location: locField,
+                    safety: sfwField,
+                    description: desField,
+                    tags: tagField,
+                    storageLink: storageLinkName
+                }).then(function(){ 
+                $("#cancelEditsBtn").click(); 
+                $("#imageModal").modal('hide');
+            })});
+        }
+        else{
+            console.log("No infile update");
+    	    var imgRef = database.ref("/images");
+        	imgRef.child(titleField).update({
+    	        imageName: titleField,
+    	        location: locField,
+    	        safety: sfwField,
+    	        description: desField,
+    	        tags: tagField,
+    	        storageLink: imgInfo.storageLink
+    		}).then(function(){
+                $("#cancelEditsBtn").click();
+                $("#imageModal").modal('hide');			
+    		});
+        }
 	}
 });
 
 //Empty the modal body when hidden
 $("#imageModal").on('hide.bs.modal', function(){
+    document.getElementById("imageModalTitle").textContent = "";
     var body = this.getElementsByClassName("modal-body")[0];
-    var children = body.children;
+    // var children = body.children;
     while(body.hasChildNodes()){
         body.removeChild(body.lastChild);
     }
+
+    var confirmBtn = document.getElementById("confirmEditsBtn");
+    confirmBtn.classList.add('hidden');
+    $("#cancelEditsBtn").addClass("hidden");
+    $("#editImgBtn").removeClass("hidden");            
+    $("#deleteImgBtn").removeClass("hidden");
 });
 
 //Empty login modal fields when hidden
@@ -197,11 +307,23 @@ $("#loginModal").on('hide.bs.modal', function(){
 	}
 });
 
+//Empty register modal fields when hidden
+$("#registerModal").on('hide.bs.modal', function(){
+    var inputs = this.getElementsByTagName("input");
+    console.log(inputs);
+    for(var i = 0; i < inputs.length; i++){
+        inputs[i].value = "";
+    }
+});
+
 //Empty addArt modal fields when hidden
 $("#addArtModal").on('hide.bs.modal', function(){
 	var inputs = this.getElementsByTagName("input");
-	console.log(inputs);
 	for(var i = 0; i < inputs.length; i++){
+        if(inputs[i].type == "radio"){
+            inputs[i].checked = false;
+            continue;
+        }
 		inputs[i].value = "";
 	}
 })
@@ -210,10 +332,13 @@ $("#addArtModal").on('hide.bs.modal', function(){
 var changesBtn = document.getElementById("saveChanges");
 changesBtn.onclick = function() {
     //Check if someone is logged in before adding
-    var user = firebase.auth().currentUser;
     if(!user){
-        window.alert("You need to log in first!\n");
+        alert("You must log in to use this function..");
+        $("#addArtModal").modal('hide');
         return;
+    }
+    else{
+        console.log(user);
     }
 
     //Grab content of form
@@ -282,20 +407,35 @@ function getRadioVal(radioName){
 function genTemplate(childSCval){
 	var returnString = "";
 	for(var key in childSCval){
-		returnString += "<h3>" + key + "</h3><br/>";
-		returnString += "<p>" + childSCval[key] + "</p><br/><br/>";
+        if(key == "imageName"){
+            continue;
+        }
+
+        //Check if the field is empty and let the user know
+        var value = childSCval[key];
+        if(!value){
+            value = "No " + key + "!";
+        }
+
+        //Capitalize the field name for prettiness
+        var prettyKey = key.charAt(0).toUpperCase() + key.slice(1);
+
+		returnString += "<h3>" + prettyKey + "</h3><br/>";
+		returnString += "<p>" + value + "</p><br/><br/>";
 	}
 	return returnString;
 }
 
 function addHiddenEdit(){
 	var content = "<div id=\"editView\" class=\"hidden\">" +
+                  "<h2 style=\"text-align: center\">Edit Art</h2>" +
                	  "<p>Title:</p><input type=\"text\" id=\"editTitle\"><br/><br/>" +
                   "<p>Location:</p><input type=\"text\" id=\"editLocation\"><br/><br/>" +
-                  "<p>Safe for work:</p><input type=\"radio\" name=\"editSFW\" value=\"Yes\">Yes<input type=\"radio\" name=\"SFW\" value=\"No\">No<br/><br/>" +
+                  "<p>Safe for work:<div id=\"sfwRadios\"></p><input type=\"radio\" name=\"editSFW\" value=\"Yes\">Yes<input type=\"radio\" name=\"SFW\" value=\"No\">No</div><br/><br/>" +
                   "<p>Description:</p><input type=\"text\" id=\"editDescription\"><br/><br/>" +
 	              "<p>Tags:</p><input type=\"text\" id=\"editTags\"><br/><br/>" +
-	              "</div>";
+	              "<p>File:</p><input type=\"file\" id=\"editFile\"><br/><br/>" +
+                  "</div>";
 
     return content;
 }

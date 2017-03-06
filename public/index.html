@@ -21,6 +21,9 @@
         <li>
             <p><a href="#" data-toggle="modal" data-target="#registerModal">Register</a></p>
         </li>
+        <li>
+			<p><a href="#" id="logout" class="hidden">Log Out</a></p>
+        </li>
     </ul>
     <div style="font-size: 30px">&nbsp;</div>
     <div id="homepage-container"></div>
@@ -34,12 +37,14 @@
                     <h4 class="modal-title" id="myModalLabel">Add Art</h4>
                 </div>
                 <div class="modal-body">
-                    <p>Title:</p><input type="text" id="title"><br/><br/>
-                    <p>Location:</p><input type="text" id="location"><br/><br/>
-                    <p>Safe for work:</p><input type="radio" name="SFW" value="Yes">Yes<input type="radio" name="SFW" value="No">No<br/><br/>
-                    <p>File:</p><input type="file" id="file"><br/><br/>
-                    <p>Description:</p><input type="text" id="description"><br/><br/>
-                    <p>Tags:</p><input type="text" id="tags"><br/><br/>
+                	<div id="addFields">
+	                    <p>Title:</p><input type="text" id="title"><br/><br/>
+	                    <p>Location:</p><input type="text" id="location"><br/><br/>
+	                    <p>Safe for work:</p><input type="radio" name="SFW" value="Yes">Yes<input type="radio" name="SFW" value="No">No<br/><br/>
+	                    <p>File:</p><input type="file" id="file"><br/><br/>
+	                    <p>Description:</p><input type="text" id="description"><br/><br/>
+	                    <p>Tags:</p><input type="text" id="tags"><br/><br/>
+                    </div>
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
@@ -114,15 +119,16 @@
             <div class="modal-content">
                 <div class="modal-header">
                     <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
-                    <h4 class="modal-title" id="imageModalTitle"></h4>
+                    <h2 class="modal-title" id="imageModalTitle"></h2>
                 </div>
-                <div class="modal-body">
+                <div class="modal-body">Content Loading...
                 </div>
-                <div class="modal-footer">
-                	<button id="confirmEditsBtn" type="button" class="btn btn-primary hidden">Confirm</button>
-                    <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+                <div class="modal-footer">	
+                    <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>                      
+                    <button id="deleteImgBtn" type="button" class="btn btn-primary">Delete</button> 
                     <button id="editImgBtn" type="button" class="btn btn-primary">Edit</button>
-                    <button id="deleteImgBtn" type="button" class="btn btn-primary">Delete</button>
+                    <button id="cancelEditsBtn" type="button" class="btn btn-default hidden">Cancel</button>  
+                	<button id="confirmEditsBtn" type="button" class="btn btn-primary hidden">Confirm</button>              
                 </div>
             </div>
         </div>
