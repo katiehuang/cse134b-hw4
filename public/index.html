@@ -5,6 +5,7 @@
     <link rel="stylesheet" href="style.css" type="text/css">
     <!--CSS for modal-->
     <link rel="stylesheet" type="text/css" Href="bootstrap/bootstrap.min.css">
+    <meta name="viewport" content="width=device-width,initial-scale=1.0">
 </head>
 
 <body>
@@ -21,13 +22,24 @@
         <li>
             <p><a href="#" data-toggle="modal" data-target="#registerModal">Register</a></p>
         </li>
-        <li>
-			<p><a href="#" id="logout" class="hidden">Log Out</a></p>
+        <li style="float:right">
+            <p><a href="#" id="logout" class="hidden">Log Out</a></p>
+        </li>
+        <li style="float:right">
+            <p id="user" class="hidden"></p>
         </li>
     </ul>
-    <div style="font-size: 30px">&nbsp;</div>
-    <div id="homepage-container"></div>
-
+    <header>
+        <div id="opaque">
+            <center>
+                <h1>Art You Find In Your Bathrooms</h1>
+                <h3>"y'all are totally gonna be on the lookout when you go into a bathroom from now on"</h3>
+                <quote><i>- Jake Espinueva, founder</i></quote>
+            </center>
+    </header>
+    </div>
+    <div id="homepage-container">
+    </div>
     <!-- Add Art Modal -->
     <div class="modal fade" id="addArtModal" tabindex="-1" role="dialog" aria-labelledby="addArtModal">
         <div class="modal-dialog" role="document">
@@ -37,13 +49,32 @@
                     <h4 class="modal-title" id="myModalLabel">Add Art</h4>
                 </div>
                 <div class="modal-body">
-                	<div id="addFields">
-	                    <p>Title:</p><input type="text" id="title"><br/><br/>
-	                    <p>Location:</p><input type="text" id="location"><br/><br/>
-	                    <p>Safe for work:</p><input type="radio" name="SFW" value="Yes">Yes<input type="radio" name="SFW" value="No">No<br/><br/>
-	                    <p>File:</p><input type="file" id="file"><br/><br/>
-	                    <p>Description:</p><input type="text" id="description"><br/><br/>
-	                    <p>Tags:</p><input type="text" id="tags"><br/><br/>
+                    <div id="addFields">
+                        <p>Title:</p>
+                        <input type="text" id="title">
+                        <br/>
+                        <br/>
+                        <p>Location:</p>
+                        <input type="text" id="location">
+                        <br/>
+                        <br/>
+                        <p>Safe for work:</p>
+                        <input type="radio" name="SFW" value="Yes">Yes
+                        <input type="radio" name="SFW" value="No">No
+                        <br/>
+                        <br/>
+                        <p>File:</p>
+                        <input type="file" id="file">
+                        <br/>
+                        <br/>
+                        <p>Description:</p>
+                        <input type="text" id="description">
+                        <br/>
+                        <br/>
+                        <p>Tags:</p>
+                        <input type="text" id="tags">
+                        <br/>
+                        <br/>
                     </div>
                 </div>
                 <div class="modal-footer">
@@ -53,7 +84,6 @@
             </div>
         </div>
     </div>
-
     <!-- Login Modal -->
     <div class="modal fade" id="loginModal" tabindex="-1" role="dialog" aria-labelledby="myLoginModal">
         <div class="modal-dialog" role="document">
@@ -84,7 +114,6 @@
             </div>
         </div>
     </div>
-    
     <!-- Register Modal -->
     <div class="modal fade" id="registerModal" tabindex="-1" role="dialog" aria-labelledby="myRegisterModal">
         <div class="modal-dialog" role="document">
@@ -112,7 +141,6 @@
             </div>
         </div>
     </div>
-
     <!-- Image Modal -->
     <div class="modal fade" id="imageModal" tabindex="-1" role="dialog" aria-labelledby="myImageModal">
         <div class="modal-dialog" role="document">
@@ -123,17 +151,16 @@
                 </div>
                 <div class="modal-body">Content Loading...
                 </div>
-                <div class="modal-footer">	
-                    <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>                      
-                    <button id="deleteImgBtn" type="button" class="btn btn-primary">Delete</button> 
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+                    <button id="deleteImgBtn" type="button" class="btn btn-primary">Delete</button>
                     <button id="editImgBtn" type="button" class="btn btn-primary">Edit</button>
-                    <button id="cancelEditsBtn" type="button" class="btn btn-default hidden">Cancel</button>  
-                	<button id="confirmEditsBtn" type="button" class="btn btn-primary hidden">Confirm</button>              
+                    <button id="cancelEditsBtn" type="button" class="btn btn-default hidden">Cancel</button>
+                    <button id="confirmEditsBtn" type="button" class="btn btn-primary hidden">Confirm</button>
                 </div>
             </div>
         </div>
     </div>
-    
     <script src="https://www.gstatic.com/firebasejs/3.7.0/firebase.js"></script>
     <script src="bootstrap/jquery-3.1.1.min.js"></script>
     <script src="bootstrap/bootstrap.min.js"></script>

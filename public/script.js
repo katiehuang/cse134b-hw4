@@ -14,13 +14,16 @@ var mobile = "";
 //Global user variable
 var user = firebase.auth().currentUser;
 var logout = document.getElementById("logout");
+var userShow = document.getElementById("user");
 firebase.auth().onAuthStateChanged(function(users) {
   user = users;
   if (users) {
     logout.classList.remove("hidden");
-    
+    userShow.classList.remove("hidden");
+    userShow.innerHTML = user.email;
   } else {
     logout.classList.add("hidden");
+    userShow.classList.add("hidden");
   }
 });
 
@@ -278,7 +281,8 @@ $("#imageModal").on('show.bs.modal', function(e) {
     	        storageLink: imgInfo.storageLink
     		}).then(function(){
                 $("#cancelEditsBtn").click();
-                $("#imageModal").modal('hide');			
+                $("#imageModal").modal('hide');
+                window.location.reload();			
     		});
         }
 	}
